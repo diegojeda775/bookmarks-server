@@ -5,9 +5,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
 const winston = require('winston');
-const { bookmarks } = require('./bookmarks');
+//const { bookmarks } = require('./bookmarks.js');
 const { v4: uuid } = require('uuid');
-const { useWebUri } = require('valid-url'); 
+const { isWebUri } = require('valid-url'); 
 
 
 const app = express();
@@ -57,25 +57,48 @@ app.use(function validateBearerToken(req, res, next) {
     // move to the next middleware
     next()
 })
+const bookmarks = [
+    {
+      id: 0,
+      title: 'Google',
+      url: 'http://www.google.com',
+      rating: '3',
+      description: 'Internet-related services and products.'
+    },
+    {
+      id: 1,
+      title: 'Thinkful',
+      url: 'http://www.thinkful.com',
+      rating: '5',
+      description: '1-on-1 learning to accelerate your way to a new high-growth tech career!'
+    },
+    {
+      id: 2,
+      title: 'Github',
+      url: 'http://www.github.com',
+      rating: '4',
+      description: 'brings together the world\'s largest community of developers.'
+    }
+];
 
 app.get('/bookmarks', (req, res) => {
     res.json(bookmarks);
 });
 
-app.get('/bookmarks/:bookmarks_id', (req, res) => {
-    const { bookmark_id } = req.params;
+app.get('/bookmarks/:id', (req, res) => {
+    const { id } = req.params;
 
-    const bmark = bookmarks.find(b => b.id == bookmark_id)
+    const bmark = bookmarks.find(b => b.id == id)
 
     if (!bmark) {
-      logger.error(`Bookmark with id ${bookmark_id} not found.`);
+      logger.error(`Bookmark with id ${id} not found.`);
       return res.status(404).send('Bookmark Not Found');
     }
 
     res.json(bmark)
 });
 
-app.post('/add-bookmark', (req,res) => {
+app.post('/bookmarks', (req,res) => {
     const { title, url, rating, description } = req.body;
 
     if(!title) {
@@ -130,19 +153,19 @@ app.post('/add-bookmark', (req,res) => {
     res.send('All Validation Pass');
 });
 
-app.delete('/bookmarks/:bookmarks_id', (req, res) => {
-    const { bookmark_id } = req.params
+app.delete('/bookmarks/:id', (req, res) => {
+    const { id } = req.params
 
-    const bmarkI = store.bookmarks.findIndex(b => b.id === bookmark_id)
+    const bmarkI = bookmarks.findIndex(b => b.id == id)
 
     if (bmarkI === -1) {
-      logger.error(`Bookmark with id ${bookmark_id} not found.`);
+      logger.error(`Bookmark with id ${id} not found.`);
       return res.status(404).send('Bookmark Not Found');
     }
 
-    bookmarks.splice(bookmarkIndex, 1);
+    bookmarks.splice(bmarkI, 1);
 
-    logger.info(`Bookmark with id ${bookmark_id} deleted.`);
+    logger.info(`Bookmark with id ${id} deleted.`);
     res.status(204).end();
 });
 
